@@ -1,185 +1,149 @@
 <template>
-  <div>
-    <vxe-toolbar ref="toolbarRef" print>
-      <template #buttons>
-        <vxe-button content="打印表格" @click="printEvent"></vxe-button>
-        <vxe-button content="打印勾选行" @click="printSelectEvent"></vxe-button>
+  <vxe-table
+    border
+    header-align="center"
+    align="center"
+    show-overflow
+    keep-source
+    height="400"
+    :column-config="{ resizable: true, useKey: true }"
+    :row-config="{ useKey: true }"
+    :edit-config="{
+      trigger: 'click',
+      mode: 'cell',
+      showStatus: true,
+      showIcon: false,
+    }"
+    :custom-config="{ immediate: true }"
+    :scroll-y="{ enabled: true, gt: 0 }"
+    style="font-size: 18px"
+    :data="tableData"
+    ref="tableRef"
+    show-footer
+    :footer-method="footerMethod"
+  >
+    <vxe-column
+      v-for="(vv, index) in tableColumns"
+      :key="vv.prop"
+      :field="vv.prop"
+      :title="vv.title_name"
+      :visible="vv.show"
+      :edit-render="{ autofocus: '.vxe-input--inner' }"
+      :filters="roleOptions"
+      :filter-method="filterRoleMethod"
+    >
+      <template #edit="{ row, column }">
+        <vxe-input v-model="tableData[row.qq][column.field]" type="text" />
       </template>
-    </vxe-toolbar>
-
-    <vxe-table
-      border
-      ref="tableRef"
-      height="300"
-      :print-config="{}"
-      :data="tableData">
-      <vxe-column type="checkbox" width="60"></vxe-column>
-      <vxe-column type="seq" width="60"></vxe-column>
-      <vxe-column field="name" title="Name"></vxe-column>
-      <vxe-column field="role" title="Role"></vxe-column>
-      <vxe-column field="age" title="Age"></vxe-column>
-      <vxe-column field="address" title="Address"></vxe-column>
-    </vxe-table>
-  </div>
+      <template #default="{ row, column }">
+        {{ tableData[row.qq][column.field] }}
+      </template>
+    </vxe-column>
+  </vxe-table>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-const tableRef = ref()
-const toolbarRef = ref()
-// 打印样式
-const printStyle = `
-.vxe-table th {
-  color: red;
-}
-.vxe-table td {
-  color: green;
-}
-.vxe-table, .vxe-table th, .vxe-table td {
-  border-color: blue;
-}
+import { ref, nextTick, computed } from "vue";
+const tableRef = ref();
+const toolbarRef = ref();
+const tableColumns = ref([]);
+const tableData = ref([]);
 
-.my-title {
-  text-align: center;
-}
-.my-list-row {
-  display: inline-block;
-  width: 100%;
-}
-.my-list-col {
-  float: left;
-  width: 33.33%;
-  height: 28px;
-  line-height: 28px;
-}
-.my-top,
-.my-bottom {
-  font-size: 12px;
-}
-.my-top {
-  margin-bottom: 5px;
-}
-.my-bottom {
-  margin-top: 30px;
-  text-align: right;
-}
-`
-// 打印顶部内容模板
-const topHtml = `
-<h1 class="my-title">出货单据</h1>
-<div class="my-top">
-  <div class="my-list-row">
-    <div class="my-list-col">商品名称：vxe-table</div>
-    <div class="my-list-col">发货单号：X2665847132654</div>
-    <div class="my-list-col">发货日期：2020-09-20</div>
-  </div>
-  <div class="my-list-row">
-    <div class="my-list-col">收货姓名：小徐</div>
-    <div class="my-list-col">收货地址：火星第七区18号001</div>
-    <div class="my-list-col">联系电话：10086</div>
-  </div>
-</div>
-`
-// 打印底部内容模板
-const bottomHtml = `
-<div class="my-bottom">
-  <div class="my-list-row">
-    <div class="my-list-col"></div>
-    <div class="my-list-col">创建人：小徐</div>
-    <div class="my-list-col">创建日期：2020-09-20</div>
-  </div>
-</div>
-`
-const tableData = ref([
-  { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: 'Man', age: 28, address: 'test abc' },
-  { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: 'Women', age: 22, address: 'Shanghai' },
-  { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: 'Man', age: 32, address: 'Beijing' },
-  { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: 'Women', age: 23, address: 'test abc' },
-  { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: 'Women', age: 30, address: 'Shenzhen' },
-  { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: 'Women', age: 21, address: 'test abc' },
-  { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: 'Man', age: 29, address: 'test abc' },
-  { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: 'Man', age: 35, address: 'test abc' },
-  { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: 'Man', age: 28, address: 'test abc' },
-  { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: 'Women', age: 22, address: 'Shanghai' },
-  { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: 'Man', age: 32, address: 'Beijing' },
-  { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: 'Women', age: 23, address: 'test abc' },
-  { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: 'Women', age: 30, address: 'Shenzhen' },
-  { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: 'Women', age: 21, address: 'test abc' },
-  { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: 'Man', age: 29, address: 'test abc' },
-  { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: 'Man', age: 35, address: 'test abc' },  { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: 'Man', age: 28, address: 'test abc' },
-  { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: 'Women', age: 22, address: 'Shanghai' },
-  { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: 'Man', age: 32, address: 'Beijing' },
-  { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: 'Women', age: 23, address: 'test abc' },
-  { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: 'Women', age: 30, address: 'Shenzhen' },
-  { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: 'Women', age: 21, address: 'test abc' },
-  { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: 'Man', age: 29, address: 'test abc' },
-  { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: 'Man', age: 35, address: 'test abc' },
-  { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: 'Man', age: 28, address: 'test abc' },
-  { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: 'Women', age: 22, address: 'Shanghai' },
-  { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: 'Man', age: 32, address: 'Beijing' },
-  { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: 'Women', age: 23, address: 'test abc' },
-  { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: 'Women', age: 30, address: 'Shenzhen' },
-  { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: 'Women', age: 21, address: 'test abc' },
-  { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: 'Man', age: 29, address: 'test abc' },
-  { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: 'Man', age: 35, address: 'test abc' },  { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: 'Man', age: 28, address: 'test abc' },
-  { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: 'Women', age: 22, address: 'Shanghai' },
-  { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: 'Man', age: 32, address: 'Beijing' },
-  { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: 'Women', age: 23, address: 'test abc' },
-  { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: 'Women', age: 30, address: 'Shenzhen' },
-  { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: 'Women', age: 21, address: 'test abc' },
-  { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: 'Man', age: 29, address: 'test abc' },
-  { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: 'Man', age: 35, address: 'test abc' }
-])
-const printEvent = () => {
-  const $table = tableRef.value
-  if ($table) {
-    $table.print({
-      sheetName: '打印出货单据',
-      // 打印样式设置
-      style: printStyle,
-      // 打印指定列
-      columns: [
-        { type: 'seq' },
-        { field: 'name' },
-        { field: 'role' },
-        { field: 'address' }
-      ],
-      // 打印之前拼接自定义模板
-      beforePrintMethod: ({ content }) => {
-        // 打印之前，返回自定义的 html 内容
-        return topHtml + content + bottomHtml
+const roleOptions = ref([{ data: "" }]);
+
+const countAllAmount = (data) => {
+  let count = 0;
+  data.forEach((row) => {
+    count += countAmount(row);
+  });
+  return count;
+};
+
+
+
+const countAmount = (row) => {
+  return row[tableColumns.value[3].prop];
+};
+
+
+
+const footerMethod = ({ columns, data }) => {
+  return [
+    columns.map((column, columnIndex) => {
+      if (columnIndex === 0) {
+        return "合计";
       }
-    })
-  }
-}
-const printSelectEvent = () => {
-  const $table = tableRef.value
-  if ($table) {
-    $table.print({
-      sheetName: '打印勾选行',
-      // 打印样式设置
-      style: printStyle,
-      mode: 'selected',
-      // 打印指定列
-      columns: [
-        { type: 'seq' },
-        { field: 'name' },
-        { field: 'role' },
-        { field: 'address' }
-      ],
-      beforePrintMethod: ({ content }) => {
-        // 打印之前，返回自定义的 html 内容
-        return topHtml + content + bottomHtml
+      if (columnIndex === 3) {
+        return `${countAllAmount(data)}`;
       }
-    })
-  }
-}
-nextTick(() => {
-  // 将表格和工具栏进行关联
-  const $table = tableRef.value
-  const $toolbar = toolbarRef.value
-  if ($table && $toolbar) {
-    $table.connect($toolbar)
-  }
-})
+      return "-";
+    }),
+  ];
+};
+const filterRoleMethod = ({ column, value, row }) => {
+  return row[column.field] === value;
+};
+
+setTimeout(() => {
+  let temp = [
+    {
+      qq: 0,
+      id: 10001,
+      name: "Test1",
+      role: "Develop",
+      sex: "Man",
+      age: 28,
+      address: "test abc",
+    },
+    {
+      qq: 1,
+      id: 10002,
+      name: "Test1",
+      role: "Test",
+      sex: "Women",
+      age: 22,
+      address: "Guangzhou",
+    },
+    {
+      qq: 2,
+      id: 10003,
+      name: "Test3",
+      role: "PM",
+      sex: "Man",
+      age: 32,
+      address: "Shanghai",
+    },
+    {
+      qq: 3,
+      id: 10004,
+      name: "Test4",
+      role: "Designer",
+      sex: "Women",
+      age: 23,
+      address: "test abc",
+    },
+  ];
+
+  let temp2 = [
+    { prop: "name", title_name: "Name" },
+    { prop: "role", title_name: "Role" },
+    { prop: "sex", title_name: "Sex" },
+    { prop: "age", title_name: "Age" },
+    { prop: "address", title_name: "Address" },
+  ];
+
+  let temp3 = [
+    { label: "Man", value: "Man" },
+    { label: "John", value: "John" },
+  ];
+
+  tableColumns.value = temp2;
+  tableData.value = temp;
+  nextTick(() => {
+    tableRef.value.setFilter("sex", temp3);
+  });
+  
+}, 1000);
+
+
 </script>
