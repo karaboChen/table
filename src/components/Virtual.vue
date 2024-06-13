@@ -1,4 +1,9 @@
 <template>
+  <vxe-toolbar ref="toolbarRef" custom>
+    <template #buttons>
+      <button @click="add(-1)">+++</button>
+    </template>
+  </vxe-toolbar>
   <vxe-table
     border
     header-align="center"
@@ -6,8 +11,8 @@
     show-overflow
     keep-source
     height="400"
-    :column-config="{ resizable: true, useKey: true }"
-    :row-config="{ useKey: true }"
+    :column-config="{ resizable: true, useKey: true, isCurrent: true }"
+    :row-config="{ useKey: true, isCurrent: true, isHover: true }"
     :edit-config="{
       trigger: 'click',
       mode: 'cell',
@@ -21,6 +26,12 @@
     ref="tableRef"
     show-footer
     :footer-method="footerMethod"
+    :mouse-config="{ selected: true }"
+    :keyboard-config="{
+      isEnter: true,
+      isEdit: true,
+      editMethod,
+    }"
   >
     <vxe-column
       v-for="(vv, index) in tableColumns"
@@ -35,6 +46,7 @@
       <template #edit="{ row, column }">
         <vxe-input v-model="tableData[row.qq][column.field]" type="text" />
       </template>
+
       <template #default="{ row, column }">
         {{ tableData[row.qq][column.field] }}
       </template>
@@ -43,13 +55,49 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from "vue";
+import { ref, nextTick } from "vue";
 const tableRef = ref();
 const toolbarRef = ref();
 const tableColumns = ref([]);
 const tableData = ref([]);
 
 const roleOptions = ref([{ data: "" }]);
+
+nextTick(() => {
+  // 将表格和工具栏进行关联
+  const $table = tableRef.value;
+  const $toolbar = toolbarRef.value;
+  if ($table && $toolbar) {
+    $table.connect($toolbar);
+  }
+});
+
+function editMethod({ row, column }) {
+  const $table = tableRef.value;
+  // 重写默认的覆盖式，改为追加式
+  $table.setEditCell(row, column);
+}
+
+
+
+function add(row) {
+  const record = {
+    qq: 4,
+    id: 10000,
+    name: "Test99",
+    role: "Designer",
+    sex: "Women",
+    age: 23,
+    address: "test abc",
+  };
+
+  tableData.value.push(record);
+
+  nextTick(() => {
+    tableRef.value.reloadData(tableData.value);
+    console.log(tableData.value);
+  });
+}
 
 const countAllAmount = (data) => {
   let count = 0;
@@ -59,13 +107,9 @@ const countAllAmount = (data) => {
   return count;
 };
 
-
-
 const countAmount = (row) => {
   return row[tableColumns.value[3].prop];
 };
-
-
 
 const footerMethod = ({ columns, data }) => {
   return [
@@ -142,8 +186,5 @@ setTimeout(() => {
   nextTick(() => {
     tableRef.value.setFilter("sex", temp3);
   });
-  
 }, 1000);
-
-
 </script>

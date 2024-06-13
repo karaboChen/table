@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.0",
+    "ag-grid-vue3": "^31.3.2",
     "echarts": "^5.4.3",
     "element-plus": "^2.4.0",
     "vue": "3.4",
