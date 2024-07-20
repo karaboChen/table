@@ -37,6 +37,11 @@ const formRules = ref({
 onMounted(async () => {
   // let res = await Get_test({ name: "陳柄坊" });
   // console.log(res.data);
+  VxeUI.modal.message({
+    id: 'myUniqueMsg',
+    content: '很遺憾，這工號已經被建立過了^^',
+    status: 'warning'
+  })
 });
 
 const changeEvent = (params) => {
