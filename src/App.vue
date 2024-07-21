@@ -1,11 +1,7 @@
 <script setup>
-import Table from "@/components/Vxe.vue";
+import VxeSearch from "@/components/VxeSearch.vue";
 </script>
 
 <template>
-  <Table />
+  <VxeSearch />
 </template>
-
-<style lang="scss" scoped>
-
-</style>
