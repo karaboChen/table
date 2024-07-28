@@ -7,4 +7,4 @@ const instance = axios.create({
 });
 
 
-export const Get_test = (e) => instance.post("api/DB/search",e);
+export const Get_test = (e,a) => instance.post(`api/Cookie/Cookie3?name=${e}`,a);
