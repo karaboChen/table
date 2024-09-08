@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from "vue";
-import Sortable from "sortablejs";
+import Sortable, { MultiDrag } from "sortablejs";
 
 const tableData = ref([
   {
@@ -27,20 +27,50 @@ const tableData = ref([
     role: "Designer",
     sex: "Women",
   },
+  {
+    id: 99,
+    name: "Test44",
+    role: "Designer",
+    sex: "Women",
+  },
 ]);
-
+let temp_tableData = JSON.parse(JSON.stringify(tableData.value));
 const table = ref();
 let sortable = null;
+const multiple = ref([]);
+
 onMounted(() => {
+  Sortable.mount(new MultiDrag());
   sortable = Sortable.create(
     table.value.$el.querySelector(".body--wrapper>.vxe-table--body tbody"),
     {
       animation: 150,
+      multiDrag: true,
+      forceFallback: false,
+      selectedClass: "selected",
       onEnd: ({ newIndex, oldIndex }) => {
         if (newIndex !== oldIndex) {
-          let be = tableData.value.splice(oldIndex, 1)[0];
-          tableData.value.splice(newIndex, 0, be);
+          console.log("o", oldIndex);
+          console.log("n", newIndex);
+          // let be = tableData.value.splice(oldIndex, 1)[0];
+          // tableData.value.splice(newIndex, 0, be);
         }
+      },
+      onStart: function (/**Event*/ evt) {
+        console.log();
+        evt.oldIndex; // element index within parent
+      },
+
+      onSelect: function ({ newIndicies }) {
+        multiple.value = [];
+        for (let i = 0; i < newIndicies.length; i++) {
+          multiple.value.push(newIndicies[i].index);
+        }
+        // console.log(multiple.value);
+      },
+      onDeselect: function (/**Event*/ evt) {
+        evt.item; // The deselected item
+        // console.log(123);
       },
     }
   );
@@ -100,8 +130,6 @@ function search() {
 
     return nameMatch && roleMatch && sexMatch;
   });
-
-  console.log('filteredData.value',filteredData.value);
 }
 </script>
 
@@ -141,4 +169,10 @@ function search() {
   </div>
 </template>
 
-<style></style>
+<style>
+.selected {
+  background-color: #f9c7c8 !important;
+  border: solid red 1px !important;
+  z-index: 1 !important;
+}
+</style>

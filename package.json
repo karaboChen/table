@@ -11,6 +11,7 @@
     "@microsoft/signalr": "^8.0.0",
     "ag-grid-vue3": "^31.3.2",
     "axios": "^1.7.2",
+    "dhtmlx-gantt": "^8.0.9",
     "echarts": "^5.4.3",
     "element-plus": "^2.4.0",
     "sortablejs": "^1.15.2",
