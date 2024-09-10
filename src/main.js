@@ -9,10 +9,13 @@ import VxeUI from 'vxe-pc-ui'
 import 'vxe-pc-ui/lib/style.css'
 
 import * as echarts from "echarts";
+
+import print from 'vue3-print-nb'
 const app = createApp(App);
 
 app.use(VxeTable);
 app.use(VxeUI);
+app.use(print)
 app.config.globalProperties.$echarts = echarts;
 
 app.mount("#app");
