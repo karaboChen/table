@@ -1,36 +1,74 @@
+<template>
+  <div class="container">
+    <div
+      v-for="(list, index) in 5"
+      :key="index"
+      class="header"
+      :ref="(el) => (CardsRef[index] = el)"
+    >
+      <div class="box" :class="{ shrink: shrinkIndexes.includes(index) }">
+        <p>老司機</p>
+        <p :class="{ see: shrinkIndexes.includes(index) }">996</p>
+      </div>
+      <ol>
+        <li v-for="i in 10" :key="i">asddewf</li>
+      </ol>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import { reactive } from "vue";
-const printObj = reactive({
-  id: "printMe",
-  popTitle: "good print",
-  extraCss:
-    "https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.compat.css, https://cdn.bootcdn.net/ajax/libs/hover.css/2.3.1/css/hover-min.css",
-  extraHead: '<meta http-equiv="Content-Language"content="zh-cn"/>',
-  beforeOpenCallback(vue) {
-    vue.printLoading = true;
-    console.log("打开之前");
-  },
-  openCallback(vue) {
-    vue.printLoading = false;
-    console.log("执行了打印");
-  },
-  closeCallback(vue) {
-    console.log("关闭了打印工具");
-  },
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useScrollListener } from "@/compasble/desroll";
+const CardsRef = ref([]);
+const shrinkIndexes = ref([]);
+const windowHeight = window.innerHeight;
+const handleScroll = () => {
+  shrinkIndexes.value = [];
+  CardsRef.value.forEach((el, index) => {
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const isTopmost = rect.top <= 0 && rect.bottom > 0;
+    const isFullyVisible = rect.top > 0 && rect.bottom <= windowHeight;
+    if (isTopmost && !isFullyVisible) {
+      shrinkIndexes.value.push(index);
+    }
+  });
+  if (shrinkIndexes.value.length > 0) {
+    return;
+  }
+};
+const debouncedScrollHandler = useScrollListener(handleScroll, 800);
+
+onMounted(() => {
+  window.addEventListener("scroll", debouncedScrollHandler);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", debouncedScrollHandler);
 });
 </script>
 
-<template>
-  <div id="printMe">
-    <p>葫芦娃，葫芦娃</p>
-    <p>一根藤上七朵花</p>
-    <p>小小树藤是我家 啦啦啦啦</p>
-    <p>叮当当咚咚当当　浇不大</p>
-    <p>叮当当咚咚当当 是我家</p>
-    <p>啦啦啦啦</p>
-    <p>...</p>
-  </div>
-  <button v-print="printObj">Print the entire page</button>
-</template>
+<style lang="scss" scoped>
+.see {
+  display: none;
+}
 
-<style lang="scss" scoped></style>
+.box {
+  background-color: green;
+  display: flex;
+  justify-content: space-around;
+  position: sticky;
+  top: 0;
+  height: 60px; // 原始高度
+  transition: height 0.8s ease;
+}
+
+.shrink {
+  height: 30px; // 原始高度
+
+  p {
+    transform: translateY(-13px);
+  }
+}
+</style>

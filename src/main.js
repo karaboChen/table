@@ -6,6 +6,9 @@ import VxeTable from "vxe-table";
 import "vxe-table/lib/style.css";
 import "dhtmlx-gantt/codebase/dhtmlxgantt.css";
 import VxeUI from 'vxe-pc-ui'
+
+
+
 import 'vxe-pc-ui/lib/style.css'
 
 import * as echarts from "echarts";
@@ -16,6 +19,7 @@ const app = createApp(App);
 app.use(VxeTable);
 app.use(VxeUI);
 app.use(print)
+
 app.config.globalProperties.$echarts = echarts;
 
 app.mount("#app");
