@@ -19,7 +19,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import { useScrollListener } from "@/compasble/desroll";
+import { useScrollListener } from "@/compasble/desroll.js";
 const CardsRef = ref([]);
 const shrinkIndexes = ref([]);
 const windowHeight = window.innerHeight;
@@ -33,10 +33,10 @@ const handleScroll = () => {
     if (isTopmost && !isFullyVisible) {
       shrinkIndexes.value.push(index);
     }
+    if (shrinkIndexes.value.length > 0) {
+      return;
+    }
   });
-  if (shrinkIndexes.value.length > 0) {
-    return;
-  }
 };
 const debouncedScrollHandler = useScrollListener(handleScroll, 800);
 
@@ -50,10 +50,13 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+
 .see {
   display: none;
 }
-
+.header{
+  outline: 1px solid red;
+}
 .box {
   background-color: green;
   display: flex;
