@@ -14,9 +14,9 @@
     >
       <vxe-column type="seq" width="60"></vxe-column>
       <vxe-column field="attr3" title="Project type" :edit-render="{}">
-        <!-- <template #default="{ row }">
+        <template #default="{ row }">
           <span>{{ formatProjectType(row) }}</span>
-        </template> -->
+        </template>
 
         <template #edit="{ row }">
           <vxe-select
