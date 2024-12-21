@@ -1,160 +1,154 @@
-<template>
-  <button @click="save">++</button>
-  <div>
-    <vxe-table
-      border
-      show-overflow
-      keep-source
-      ref="tableRef"
-      max-height="400"
-      :column-config="{ resizable: true }"
-      :data="tableData"
-      :edit-config="{ trigger: 'click', mode: 'row' }"
-      @edit-activated="editActivatedEvent"
-    >
-      <vxe-column type="seq" width="60"></vxe-column>
-      <vxe-column field="attr3" title="Project type" :edit-render="{}">
-        <template #default="{ row }">
-          <span>{{ formatProjectType(row) }}</span>
-        </template>
-
-        <template #edit="{ row }">
-          <vxe-select
-            v-model="row.attr3"
-            :options="ptypeList"
-            transfer
-            @change="ptypeChangeEvent(row)"
-          ></vxe-select>
-        </template>
-      </vxe-column>
-
-      <vxe-column field="attr4" title="Project name" :edit-render="{}">
-        <template #edit="{ row }">
-          <vxe-select
-            v-model="row.attr4"
-            :options="pnameList"
-            transfer
-          ></vxe-select>
-        </template>
-      </vxe-column>
-    </vxe-table>
-  </div>
-</template>
-
 <script setup>
-import { ref } from "vue";
-import XEUtils from "xe-utils";
-const tableRef = ref();
-const tableData = ref([
+import { ref, onMounted, reactive } from "vue";
+import Ham from "@/components/header.vue";
+import Menu from "@/components/Menu.vue";
+import "boxicons";
+const temp = ref([
   {
-    id: 10001,
-    name: "Test1",
-    nickname: "T1",
-    role: "Develop",
-    sex: "0",
-    sex2: ["0"],
-    num1: 40,
-    age: 28,
-    address: "Shenzhen",
-    date12: "",
-    date13: "",
-    attr3: "",
-    attr4: "",
+    title: "組織架構",
+    path: "/phone",
+    component: "AppLayout",
+    children: "false",
+    icon: "bxl-typescript",
   },
   {
-    id: 10002,
-    name: "Test2",
-    nickname: "T2",
-    role: "Designer",
-    sex: "1",
-    sex2: ["0", "1"],
-    num1: 20,
-    age: 22,
-    address: "Guangzhou",
-    date12: "",
-    date13: "2020-08-20",
-    attr3: "",
-    attr4: "",
-  },
-  {
-    id: 10003,
-    name: "Test3",
-    nickname: "T3",
-    role: "Test",
-    sex: "0",
-    sex2: ["1"],
-    num1: 200,
-    age: 32,
-    address: "Shanghai",
-    date12: "2020-09-10",
-    date13: "",
-    attr3: "2",
-    attr4: "",
-  },
-  {
-    id: 10004,
-    name: "Test4",
-    nickname: "T4",
-    role: "Designer",
-    sex: "1",
-    sex2: ["1"],
-    num1: 30,
-    age: 23,
-    address: "Shenzhen",
-    date12: "",
-    date13: "2020-12-04",
-    attr3: "",
-    attr4: "",
+    title: "資訊管理",
+    path: "/mis",
+    component: "AppLayout",
+    children: "true",
+    icon: "bx-cheese",
+    group: {
+      title: "MIS_manage",
+      items: [
+        {
+          index: "MIS_manage",
+          title: "電腦設備管理",
+          path: "mis_cem",
+          component: "Mis_cemView",
+        },
+        {
+          index: "MIS_manage",
+          title: "電腦設備管理-查詢",
+          path: "mis_cem_query",
+          component: "Mis_cemqView",
+        },
+        {
+          index: "MIS_manage",
+          title: "共用槽",
+          path: "mis_files",
+          component: "Mis_filesView",
+        },
+      ],
+    },
   },
 ]);
-const ptypeList = ref([
-  { label: "项目1", value: "1" },
-  { label: "项目2", value: "2" },
-  { label: "项目3", value: "3" },
-]);
-const pnameList = ref([]);
-const cachePnameList = ref([]);
-const formatProjectType = (row) => {
-  const item = ptypeList.value.find((item) => item.value === row.attr3);
-  return item ? item.label : row.attr3;
-};
+const foo = ref(false);
+const WindowData = reactive({
+  screenWidth: 0,
+  sidebar: "",
+});
 
-function save() {
-  const $table = tableRef.value;
-  if ($table) {
-    const { updateRecords } = $table.getRecordset();
-    console.log(updateRecords);
+WindowData.screenWidth = document.body.clientWidth;
+changeWidth(WindowData.screenWidth);
+function resize() {
+  let resizeTimeout;
+  window.onresize = () => {
+    clearTimeout(resizeTimeout); // 清除先前的計時器
+    resizeTimeout = setTimeout(() => {
+      WindowData.screenWidth = document.body.clientWidth;
+      changeWidth(WindowData.screenWidth);
+    }, 300); // 延遲 300 毫秒（可根據需求調整）
+  };
+}
+
+function changeWidth(clientWidth) {
+  // 主要根据 窗口变化 到一定位置时，变换样式
+  if (clientWidth >= 1200) {
+    // el-menu-vertical-demo el-menu-demo
+    WindowData.sidebar = "sidebar";
+  } else {
+    WindowData.sidebar = "close";
   }
 }
 
-// 更新级联选项列表
-const updatePnameList = (row) => {
-  const ptype = row.attr3;
-  let pList = [];
-  if (ptype) {
-    const item = cachePnameList.value.find((item) => item.ptype === ptype);
-    if (item) {
-      pList = item.pnameList;
-    } else {
-      // 模拟后台数据
-      Array.from(new Array(XEUtils.random(3, 8))).forEach((item, index) => {
-        pList.push({
-          label: `${ptype}-名称${index}`,
-          value: `${ptype}_${index}`,
-        });
-      });
-      cachePnameList.value.push({ ptype, pnameList: pList });
+onMounted(() => {
+  resize();
+});
+
+function IsToggle() {
+  foo.value = !foo.value;
+}
+</script>
+
+<template>
+  <div :class="[WindowData.sidebar, { close: foo }]">
+    <!-- 頭部 -->
+    <div class="logo-details" @click="IsToggle">
+      <i class="bx bx-menu bx-md"></i>
+      <div class="img">
+        <img src="@/assets/Logo.png" alt="" />
+      </div>
+    </div>
+    <!-- 路由 -->
+    <Menu :ArrayList="temp" :class="{ close: foo }"/>
+    <!-- 個人資訊 -->
+  </div>
+</template>
+
+<style lang="scss">
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  width: 180px;
+  height: 100vh;
+  background-color: rgba(75, 90, 206, 0.3);
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  .logo-details {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    i {
+      font-size: 30px;
+      height: 50px;
+      min-width: 75px;
+      text-align: center;
+      line-height: 50px;
+    }
+
+    i:hover {
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 24px;
     }
   }
-  pnameList.value = pList;
-};
-const ptypeChangeEvent = (row) => {
-  // 类型切换时更新级联的下拉数据
-  row.attr4 = "";
-  updatePnameList(row);
-};
-const editActivatedEvent = ({ row }) => {
-  console.log(111);
-  updatePnameList(row);
-};
-</script>
+
+  .img {
+    width: 85px;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+.close {
+  width: 75px;
+  height: 100vh;
+  background-color: rgba(75, 90, 206, 0.3);
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+  &::-webkit-scrollbar {
+      display: none;
+    }
+}
+</style>
