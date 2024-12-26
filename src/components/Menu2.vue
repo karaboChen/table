@@ -65,9 +65,6 @@ $hover-color: #080808;
   }
 
   &_title {
-    transform: scale(1, 1);
-    opacity: 1;
-    transition: 0.3s ease-out 0.3s;
     position: relative;
     font-size: 18px;
     display: flex;
@@ -76,6 +73,10 @@ $hover-color: #080808;
     height: 35px;
     line-height: 35px;
     cursor: pointer;
+    span {
+      transition-delay: 1s;
+      transition: height 0.3s ease;
+    }
   }
   &_title:hover {
     color: $hover-color;
@@ -86,6 +87,7 @@ $hover-color: #080808;
     opacity: 0;
     transform: scale(1, 0);
     transform-origin: top;
+    position: relative;
     a {
       text-decoration: none;
       color: #4a4a4a;
@@ -130,16 +132,34 @@ $hover-color: #080808;
 
 .close {
   width: 50px;
-  overflow: hidden;
+
   .open_title {
-    > :not(:first-child) {
+    .arrow {
+      height: 0;
       width: 0;
       overflow: hidden;
+      visibility: hidden;
     }
+    span {
+      height: 0;
+      width: 0;
+      display: inline-block;
+      overflow: hidden;
+    }
+    // > :not(:first-child) {
+    //   width: 0;
+    //   height: 0;
+    //   display: inline-block;
+    //   visibility: hidden;
+    //   overflow: hidden;
+    // }
   }
   .open_txt {
+    height: 0;
     width: 0;
     overflow: hidden;
+    visibility: hidden;
+    display: inline-block;
   }
 }
 </style>

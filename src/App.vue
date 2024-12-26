@@ -1,19 +1,21 @@
 <script setup>
-import Menu from "@/components/Menu2.vue";
+import Menu3 from "./components/Menu3.vue";
 </script>
 
 <template>
-  <div>
-    <Menu />
+  <div class="ww">
+    <Menu3 />
   </div>
 </template>
 
-<style lang="scss" >
+<style lang="scss">
 * {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-
+.ww {
+  height: 100vh;
+}
 </style>
